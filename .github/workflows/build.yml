@@ -19,16 +19,29 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Find Gradle project folder
+        id: find
+        run: |
+          GRADLE_FILE=$(find . -name "settings.gradle*" -not -path "*/.*" -not -path "*/build/*" | head -n 1)
+          if [ -z "$GRADLE_FILE" ]; then
+            echo "settings.gradle မတွေ့ပါ"
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$GRADLE_FILE")
+          echo "Gradle project: $PROJECT_DIR"
+          echo "dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
+
       - name: Grant execute permission for gradlew
-        working-directory: your-project-folder
-        run: chmod +x gradlew
+        working-directory: ${{ steps.find.outputs.dir }}
+        run: chmod +x ./gradlew
 
       - name: Build APK with Gradle
-        working-directory: your-project-folder
+        working-directory: ${{ steps.find.outputs.dir }}
         run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
-          path: your-project-folder/app/build/outputs/apk/debug/app-debug.apk
+          path: "**/build/outputs/apk/debug/*.apk"
+          if-no-files-found: error

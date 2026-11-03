@@ -19,20 +19,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # အသစ်ထည့်သွင်းထားသော Step - gradle-wrapper.jar ကို Download ဆွဲယူခြင်း
-      - name: Download Gradle Wrapper Jar
-        run: |
-          curl -L -o gradle/wrapper/gradle-wrapper.jar \
-          https://raw.githubusercontent.com/gradle/gradle/v8.1.0/gradle/wrapper/gradle-wrapper.jar
-
       - name: Grant execute permission for gradlew
+        working-directory: your-project-folder
         run: chmod +x gradlew
 
       - name: Build APK with Gradle
+        working-directory: your-project-folder
         run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: your-project-folder/app/build/outputs/apk/debug/app-debug.apk

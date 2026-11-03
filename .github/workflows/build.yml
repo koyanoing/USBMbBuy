@@ -31,17 +31,24 @@ jobs:
           echo "Gradle project: $PROJECT_DIR"
           echo "dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
 
-      - name: Check gradlew
+      - name: Check Gradle wrapper
         run: |
-          if [ ! -f ./gradlew ]; then
-            echo "root မှာ gradlew မတွေ့ပါ"
-            ls -la
+          DIR="${{ steps.find.outputs.dir }}"
+          if [ ! -f "$DIR/gradle/wrapper/gradle-wrapper.jar" ]; then
+            echo "gradle-wrapper.jar မတွေ့ပါ: $DIR/gradle/wrapper/"
+            ls -la "$DIR/gradle/wrapper/" || true
             exit 1
           fi
-          chmod +x ./gradlew
+          if [ ! -f "$DIR/gradlew" ]; then
+            echo "gradlew မတွေ့ပါ: $DIR/"
+            ls -la "$DIR/"
+            exit 1
+          fi
+          chmod +x "$DIR/gradlew"
 
       - name: Build APK with Gradle
-        run: ./gradlew -p "${{ steps.find.outputs.dir }}" assembleDebug
+        working-directory: ${{ steps.find.outputs.dir }}
+        run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
